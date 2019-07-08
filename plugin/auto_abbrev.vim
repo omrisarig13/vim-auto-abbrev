@@ -29,6 +29,7 @@ endif
 
 " Commands {{{
 
+command! -nargs=0 AutoAbbrevAddCurrentWord call auto_abbrev#add_current_word()
 command! -nargs=* AutoAbbrevAddAbbrev call auto_abbrev#add_abbrev(<f-args>)
 
 " Commands }}}

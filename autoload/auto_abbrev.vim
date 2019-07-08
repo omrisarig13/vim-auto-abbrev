@@ -11,6 +11,21 @@ endif
 
 " Internal Functions {{{
 
+" Function s:get_right_abbrev {{{
+" @brief Get the wanted abbreviate from the user, according to the lhs value it
+"  gave.
+" @param abbrev - The lhs value as inserted by the user.
+" @return The rhs value for the abbreviate command. It would return empty string
+"  in case the user hasn't inserted any.
+" @note This function waits for input from the user, and won't continue without
+"  input from him.
+function! s:get_right_abbrev(abbrev)
+    let l:message = "Insert the right word for '" . a:abbrev . "' (empty to cancel):"
+    let l:right_word = input(l:message)
+    return l:right_word
+endfunction
+" Function s:get_right_abbrev }}}
+
 " Function s:create_abbrev_command {{{
 " @brief Create the abbreviate command that should run according to the lhs and
 "  rhs of the command.
@@ -59,6 +74,38 @@ endfunction
 " Internal Functions }}}
 
 " Exported Functions {{{
+
+" Function: auto_abbrev#add_current_word {{{
+" @brief Add the current word as an abbreviated lhs value.
+" @return None
+function! auto_abbrev#add_current_word()
+    let l:saved_unnamed_register = @@
+    " Get the current word.
+    execute "normal! yiw"
+    let l:current_word = @@
+
+    " Call the interactive add abbrev.
+    call auto_abbrev#interactive_add_abbrev(l:current_word)
+
+    let @@ = l:saved_unnamed_register
+endfunction
+" Function: auto_abbrev#add_current_word }}}
+
+" Function: auto_abbrev#interactive_add_abbrev {{{
+" @brief Add a new abbreviate to the abbreviates file, getting the wanted
+"  value from the user.
+" @param abbrev - The value to add as the lhs value of the abbreviate command
+" @return None
+function! auto_abbrev#interactive_add_abbrev(abbrev)
+    " Get the rhs value of the abbrev from the user.
+    let l:right_word = s:get_right_abbrev(a:abbrev)
+
+    " Add the abbreviate to the system.
+    if !empty(l:right_word)
+        call auto_abbrev#add_abbrev(a:abbrev, l:right_word)
+    endif
+endfunction
+" Function: auto_abbrev#interactive_add_abbrev }}}
 
 " Function: auto_abbrev#add_abbrev {{{
 " @brief Add a new abbreviate to the abbreviates file.
