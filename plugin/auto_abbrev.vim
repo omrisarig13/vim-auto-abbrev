@@ -25,6 +25,10 @@ if !exists('g:auto_abbrev_should_fix_abbrev')
     let g:auto_abbrev_should_fix_abbrev = v:true
 endif
 
+if !exists('g:auto_abbrev_source_abbrev_file')
+    let g:auto_abbrev_source_abbrev_file = v:true
+endif
+
 " Global Variables }}}
 
 " Commands {{{
@@ -48,5 +52,10 @@ if g:auto_abbrev_use_file
     elseif s:writeable_results == 2
         echoerr "vim-auto-abbrev: Abbrev file is a directory."
     endif
+endif
+
+" Source the abbreviates file if needed.
+if g:auto_abbrev_source_abbrev_file
+    execute "source " . g:auto_abbrev_file_path
 endif
 " Plugin preparing }}}
