@@ -29,6 +29,10 @@ if !exists('g:auto_abbrev_source_abbrev_file')
     let g:auto_abbrev_source_abbrev_file = v:true
 endif
 
+if !exists('g:auto_abbrev_support_deletion')
+    let g:auto_abbrev_support_deletion = v:true
+endif
+
 " Global Variables }}}
 
 " Commands {{{

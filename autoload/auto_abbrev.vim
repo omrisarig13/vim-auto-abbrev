@@ -1,12 +1,3 @@
-" Script Globals {{{
-if g:auto_abbrev_use_file
-    let s:abbrev_file_name = g:auto_abbrev_file_path
-else
-    let s:abbrev_file_name = ""
-endif
-
-" }}}
-
 " Functions {{{
 
 " Internal Functions {{{
@@ -71,6 +62,133 @@ function! s:change_current_abbrev(old_value, new_value)
 endfunction
 " Function s:change_current_abbrev }}}
 
+" Function s:remove_lines_from_file {{{
+" @brief Remove the given lines from the file, by the line numbers.
+" @param file_name - The name of the file to remove the line from.
+" @param line_numbers - A list containing all the line numbers to remove.
+" @return None
+function! s:remove_lines_from_file(file_name, line_numbers)
+    let l:file_without_lines = []
+    let l:line_number = 0
+    for l:line in readfile(a:file_name)
+        let l:line_number += 1
+        if index(a:line_numbers, l:line_number) < 0
+            call add(l:file_without_lines, l:line)
+        endif
+    endfor
+    call writefile(l:file_without_lines, a:file_name)
+endfunction
+" Function s:remove_lines_from_file }}}
+
+" Function s:decrease_values_above {{{
+" @brief Decrease all the values above the given value in the dict by the given
+"  value.
+" @param dict_to_decrease - The dict to decrease the values in.
+" @param value - The value to decrease all the values above.
+" @param decrease_value - The value to decrease all the values by.
+" @return None
+" @note The dict would change in the function.
+function! s:decrease_values_above(dict_to_decrease, value, decrease_value)
+    for [l:key, l:value] in items(a:dict_to_decrease)
+        if l:value > a:value
+            let a:dict_to_decrease[l:key] = l:value - a:decrease_value
+        endif
+    endfor
+endfunction
+" Function s:decrease_values_above }}}
+
+" Function s:remove_old_abbrev {{{
+" @brief Removes the old abbrev from the dictionary and the file, to let the
+"  new abbrev take its place.
+" @param file_name - The name of the file to remove the abbrev from.
+" @param abbrev_dict - The dictionary with all the abbrev names.
+" @param abbrev - The name of the abbrev to remove from the dict.
+" @return None
+" @note If there is no such abbrev in the dictionary, the function would do
+"  nothing.
+" @note The function would update the dict with the new line numbers of all the
+"  abbrevs in it, since they might change after a line is removed.
+function! s:remove_old_abbrev(file_name, abbrev_dict, abbrev)
+    if has_key(a:abbrev_dict, a:abbrev)
+        let l:abbrev_line_number = a:abbrev_dict[a:abbrev]
+        call remove(a:abbrev_dict, a:abbrev)
+        call s:remove_lines_from_file(a:file_name, [l:abbrev_line_number])
+        call s:decrease_values_above(a:abbrev_dict, l:abbrev_line_number, 1)
+    endif
+endfunction
+" Function s:remove_old_abbrev }}}
+
+" Function s:save_only_last {{{
+" @brief The moves on the file, and saves only the last abbrev of its kind in
+"  the file. It would add this abbrev to the dict, and remove any old abbrev 
+"  from it.
+" @param file_name - The name of the file with the abbrev in.
+" @param abbrev_dict - The dictionary with all the abbrev names.
+" @param abbrev - The name of the abbrev to update
+" @return None
+" @note The function changes the abbrev_dict it gets.
+" @note The function assumes that the given abbrev appears in the file at least
+"  once.
+function! s:save_only_last(file_name, abbrev_dict, abbrev)
+    let l:current_line_number = 0
+    let l:abbrev_regex = '.*abbreviate ' . a:abbrev
+    let l:abbrev_lines = []
+    for l:current_line in readfile(a:file_name)
+        let l:current_line_number += 1
+        " Check if the current line is the line with the abbrev.
+        if l:current_line =~ l:abbrev_regex
+            call add(l:abbrev_lines, l:current_line_number)
+        endif
+    endfor
+    let l:right_line = l:abbrev_lines[-1]
+    let a:abbrev_dict[a:abbrev] = l:right_line
+    let l:wrong_lines = l:abbrev_lines[:-2]
+    call s:remove_lines_from_file(a:file_name, l:wrong_lines)
+    for l:current_line in l:wrong_lines
+        call s:decrease_values_above(a:abbrev_dict, l:current_line, 1)
+    endfor
+endfunction
+" Function s:save_only_last }}}
+
+" Function s:get_abbrev_dict {{{
+" @brief Get a dict with all the abbreviates in the given file. The dict
+"  would include the abbrev as the key, with the abbrev line number as the
+"  value.
+" @param file_path - The path of the file to list the abbrevs of.
+" @return A dict with all the abbrevs from the file.
+function! s:get_abbrev_dict(file_path)
+    let l:abbrev_dict = {}
+    let l:line_number = 0
+    " Move over all the lines in the file
+    for l:line in readfile(a:file_path)
+        let l:line_number +=1
+        " Check if the current line is an abbrev line
+        if l:line =~ '.*abbreviate \w\w\+'
+            " Get the word from the line.
+            let l:words = split(l:line)
+            let l:abbrev_value = 0
+            for l:word in l:words
+                let l:abbrev_value += 1
+                if l:word ==# "abbreviate"
+                    let l:current_word = l:words[l:abbrev_value]
+                endif
+            endfor
+
+            " Remove the previous word in case it exists
+            if has_key(l:abbrev_dict, l:current_word)
+                call s:remove_old_abbrev(
+                    \ a:file_path, l:abbrev_dict, l:current_word)
+                let l:line_number -= 1
+            endif
+
+            " Add the new word to the file.
+            let l:abbrev_dict[l:current_word] = l:line_number
+        endif
+    endfor
+    return l:abbrev_dict
+endfunction
+" Function s:get_abbrev_dict }}}
+
 " Internal Functions }}}
 
 " Exported Functions {{{
@@ -121,9 +239,25 @@ function! auto_abbrev#add_abbrev(abbrev, full_name)
     if g:auto_abbrev_should_fix_abbrev
         call s:change_current_abbrev(a:abbrev, a:full_name)
     endif
+
+    if g:auto_abbrev_support_deletion
+        call s:save_only_last(s:abbrev_file_name, s:abbrev_dict, a:abbrev)
+    endif
 endfunction
 " Function: auto_abbrev#add_abbrev }}}
 
 " Exported Functions }}}
 
 " Functions }}}
+
+" Script Globals {{{
+if g:auto_abbrev_use_file
+    let s:abbrev_file_name = g:auto_abbrev_file_path
+else
+    let s:abbrev_file_name = ""
+endif
+
+if g:auto_abbrev_support_deletion
+    let s:abbrev_dict = s:get_abbrev_dict(g:auto_abbrev_file_path)
+endif
+" }}}
