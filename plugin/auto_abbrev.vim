@@ -38,6 +38,8 @@ endif
 " Commands {{{
 
 command! -nargs=0 AutoAbbrevAddCurrentWord call auto_abbrev#add_current_word()
+command! -nargs=0 AutoAbbrevAddCurrentLhsWord call auto_abbrev#add_current_lhs_word()
+command! -nargs=0 AutoAbbrevAddCurrentRhsWord call auto_abbrev#add_current_rhs_word()
 command! -nargs=* AutoAbbrevAddAbbrev call auto_abbrev#add_abbrev(<f-args>)
 command! -nargs=* AutoAbbrevReload call auto_abbrev#load_abbrev()
 

@@ -209,6 +209,54 @@ function! auto_abbrev#add_current_word()
 endfunction
 " Function: auto_abbrev#add_current_word }}}
 
+" Function: auto_abbrev#add_current_lhs_word {{{
+" @brief Save the current word as an lhs value.
+"  This function would be used together with auto_abbrev#add_current_rhs_word.
+"  The other function would be called in the future. When the other function
+"  would be called, the abbreviate that include this word as the lhs word would
+"  be added.
+" @return None
+function! auto_abbrev#add_current_lhs_word()
+    " Save the original register, to restore it at the end.
+    let l:saved_unnamed_register = @@
+
+    " Save the current word.
+    execute "normal! yiw"
+    let s:current_lhs = @@
+
+    let @@ = l:saved_unnamed_register
+endfunction
+" Function: auto_abbrev#add_current_lhs_word }}}
+
+" Function: auto_abbrev#add_current_rhs_word {{{
+" @brief Add the current word as the rhs of the current abbreviate.
+"  This function should be called after the function
+"  auto_abbrev#add_current_lhs_word. It would add a new abbreviate for the lhs
+"  saved value, with the current word as the rhs value of it.
+" @return None
+function! auto_abbrev#add_current_rhs_word()
+    " Save the original register, to restore it at the end.
+    let l:saved_unnamed_register = @@
+
+    " Get the current word.
+    execute "normal! yiw"
+    let l:current_rhs = @@
+
+    " Add the new abbrev pair.
+    if empty(s:current_lhs)
+        echohl WarningMsg
+        echom "AutoAbbrev: Can't add rhs abbrev without lhs word."
+        echohl None
+    else
+        call auto_abbrev#add_abbrev(s:current_lhs, l:current_rhs)
+        let s:current_lhs = ''
+    endif
+
+    " Restore the original register.
+    let @@ = l:saved_unnamed_register
+endfunction
+" Function: auto_abbrev#add_current_rhs_word }}}
+
 " Function: auto_abbrev#interactive_add_abbrev {{{
 " @brief Add a new abbreviate to the abbreviates file, getting the wanted
 "  value from the user.
@@ -271,6 +319,7 @@ if g:auto_abbrev_use_file
 else
     let s:abbrev_file_name = ""
 endif
+let s:current_lhs = ""
 
 call auto_abbrev#load_abbrev()
 " }}}
