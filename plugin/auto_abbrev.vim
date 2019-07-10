@@ -39,6 +39,7 @@ endif
 
 command! -nargs=0 AutoAbbrevAddCurrentWord call auto_abbrev#add_current_word()
 command! -nargs=* AutoAbbrevAddAbbrev call auto_abbrev#add_abbrev(<f-args>)
+command! -nargs=* AutoAbbrevReload call auto_abbrev#load_abbrev()
 
 " Commands }}}
 

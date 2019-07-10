@@ -246,6 +246,21 @@ function! auto_abbrev#add_abbrev(abbrev, full_name)
 endfunction
 " Function: auto_abbrev#add_abbrev }}}
 
+" Function: auto_abbrev#load_abbrev {{{
+" @brief Load the abbreviates from the file. The function would source the file,
+"  and load any abbreviates from it to the abbrev dict, if the option of
+"  g:auto_abbrev_support_deletion is set.
+" @return None
+function! auto_abbrev#load_abbrev()
+    if !empty(s:abbrev_file_name)
+        execute "source " . s:abbrev_file_name
+    endif
+    if g:auto_abbrev_support_deletion
+        let s:abbrev_dict = s:get_abbrev_dict(s:abbrev_file_name)
+    endif
+endfunction
+" Function: auto_abbrev#load_abbrev }}}
+
 " Exported Functions }}}
 
 " Functions }}}
@@ -257,7 +272,5 @@ else
     let s:abbrev_file_name = ""
 endif
 
-if g:auto_abbrev_support_deletion
-    let s:abbrev_dict = s:get_abbrev_dict(g:auto_abbrev_file_path)
-endif
+call auto_abbrev#load_abbrev()
 " }}}
