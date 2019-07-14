@@ -189,23 +189,59 @@ function! s:get_abbrev_dict(file_path)
 endfunction
 " Function s:get_abbrev_dict }}}
 
+" Function s:get_word_by_type {{{
+" @brief Get the word to work upon, according to the type of the command. This
+"  function would be used to let other function get different parameters
+"  according to the mode in which they were called.
+" @param type - The type that called the command. It would be 'command' in case
+"  the command was activated, 'v' in case this was called from the visual mode
+"  and 'char' when it was called from normal mode as operator.
+" @return A dict with all the abbrevs from the file.
+function! s:get_word_by_type(type)
+    " Save the register (to restore later).
+    let l:saved_unnamed_register = @@
+
+    " Copy the wanted value, according to the type called.
+    if a:type ==# 'v'
+        execute "normal! `<v`>y"
+    elseif a:type ==# 'char'
+        execute "normal! `[y`]"
+    elseif a:type ==# 'command'
+        execute "normal! yiw"
+    else
+        " Type unknown, return void.
+        echohl WarningMsg
+        echom "AutoAbbrev: Called with unknown type."
+        echohl None
+        return ''
+    endif
+    let l:current_word = @@
+
+    " Restore the register.
+    let @@ = l:saved_unnamed_register
+
+    return l:current_word
+endfunction
+" Function s:get_word_by_type }}}
+
 " Internal Functions }}}
 
 " Exported Functions {{{
 
 " Function: auto_abbrev#add_current_word {{{
 " @brief Add the current word as an abbreviated lhs value.
+" @param type - The type that called the command. It would be 'command' in case
+"  the command was activated, 'v' in case this was called from the visual mode
+"  and 'char' when it was called from normal mode as operator.
 " @return None
-function! auto_abbrev#add_current_word()
-    let l:saved_unnamed_register = @@
-    " Get the current word.
-    execute "normal! yiw"
-    let l:current_word = @@
+function! auto_abbrev#add_current_word(type)
+    " Get the word to work upon.
+    let l:current_word = s:get_word_by_type(a:type)
 
-    " Call the interactive add abbrev.
-    call auto_abbrev#interactive_add_abbrev(l:current_word)
-
-    let @@ = l:saved_unnamed_register
+    if !empty(l:current_word)
+        " Call the interactive add abbrev.
+        call auto_abbrev#interactive_add_abbrev(l:current_word)
+    endif
 endfunction
 " Function: auto_abbrev#add_current_word }}}
 
@@ -215,16 +251,12 @@ endfunction
 "  The other function would be called in the future. When the other function
 "  would be called, the abbreviate that include this word as the lhs word would
 "  be added.
+" @param type - The type that called the command. It would be 'command' in case
+"  the command was activated, 'v' in case this was called from the visual mode
+"  and 'char' when it was called from normal mode as operator.
 " @return None
-function! auto_abbrev#add_current_lhs_word()
-    " Save the original register, to restore it at the end.
-    let l:saved_unnamed_register = @@
-
-    " Save the current word.
-    execute "normal! yiw"
-    let s:current_lhs = @@
-
-    let @@ = l:saved_unnamed_register
+function! auto_abbrev#add_current_lhs_word(type)
+    let s:current_lhs = s:get_word_by_type(a:type)
 endfunction
 " Function: auto_abbrev#add_current_lhs_word }}}
 
@@ -233,27 +265,24 @@ endfunction
 "  This function should be called after the function
 "  auto_abbrev#add_current_lhs_word. It would add a new abbreviate for the lhs
 "  saved value, with the current word as the rhs value of it.
+" @param type - The type that called the command. It would be 'command' in case
+"  the command was activated, 'v' in case this was called from the visual mode
+"  and 'char' when it was called from normal mode as operator.
 " @return None
-function! auto_abbrev#add_current_rhs_word()
-    " Save the original register, to restore it at the end.
-    let l:saved_unnamed_register = @@
+function! auto_abbrev#add_current_rhs_word(type)
+    let l:current_rhs = s:get_word_by_type(a:type)
 
-    " Get the current word.
-    execute "normal! yiw"
-    let l:current_rhs = @@
-
-    " Add the new abbrev pair.
-    if empty(s:current_lhs)
-        echohl WarningMsg
-        echom "AutoAbbrev: Can't add rhs abbrev without lhs word."
-        echohl None
-    else
-        call auto_abbrev#add_abbrev(s:current_lhs, l:current_rhs)
-        let s:current_lhs = ''
+    if !empty(l:current_rhs)
+        " Add the new abbrev pair.
+        if empty(s:current_lhs)
+            echohl WarningMsg
+            echom "AutoAbbrev: Can't add rhs abbrev without lhs word."
+            echohl None
+        else
+            call auto_abbrev#add_abbrev(s:current_lhs, l:current_rhs)
+            let s:current_lhs = ''
+        endif
     endif
-
-    " Restore the original register.
-    let @@ = l:saved_unnamed_register
 endfunction
 " Function: auto_abbrev#add_current_rhs_word }}}
 
