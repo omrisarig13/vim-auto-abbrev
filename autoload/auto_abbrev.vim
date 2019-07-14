@@ -120,7 +120,7 @@ endfunction
 
 " Function s:save_only_last {{{
 " @brief The moves on the file, and saves only the last abbrev of its kind in
-"  the file. It would add this abbrev to the dict, and remove any old abbrev 
+"  the file. It would add this abbrev to the dict, and remove any old abbrev
 "  from it.
 " @param file_name - The name of the file with the abbrev in.
 " @param abbrev_dict - The dictionary with all the abbrev names.
@@ -308,6 +308,28 @@ function! auto_abbrev#load_abbrev()
     endif
 endfunction
 " Function: auto_abbrev#load_abbrev }}}
+
+" Function: auto_abbrev#del_abbrev {{{
+" @brief Delete an existing abbreviate from the abbreviates file.
+" @param abbrev - The value to remove from the abbreviate file.
+" @return None
+function! auto_abbrev#del_abbrev(abbrev)
+    let l:abbrev_word = trim(a:abbrev)
+    if !has_key(s:abbrev_dict, l:abbrev_word)
+        let l:message = "No abbrev for " . l:abbrev_word
+        echohl WarningMsg 
+        echo l:message
+        echohl None
+    else
+        call s:remove_old_abbrev(
+            \ s:abbrev_file_name, s:abbrev_dict, l:abbrev_word)
+        let l:unabbrev_command = "unabbreviate " . l:abbrev_word
+        execute l:unabbrev_command
+        let l:message = "Abbrev " . l:abbrev_word . " removed."
+        echo l:message
+    endif
+endfunction
+" Function: auto_abbrev#del_abbrev }}}
 
 " Exported Functions }}}
 

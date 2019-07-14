@@ -42,6 +42,7 @@ command! -nargs=0 AutoAbbrevAddCurrentLhsWord call auto_abbrev#add_current_lhs_w
 command! -nargs=0 AutoAbbrevAddCurrentRhsWord call auto_abbrev#add_current_rhs_word()
 command! -nargs=* AutoAbbrevAddAbbrev call auto_abbrev#add_abbrev(<f-args>)
 command! -nargs=* AutoAbbrevReload call auto_abbrev#load_abbrev()
+command! -nargs=1 AutoAbbrevDelAbbrev call auto_abbrev#del_abbrev(<f-args>)
 
 " Commands }}}
 
