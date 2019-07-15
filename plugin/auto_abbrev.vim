@@ -33,6 +33,38 @@ if !exists('g:auto_abbrev_support_deletion')
     let g:auto_abbrev_support_deletion = v:true
 endif
 
+if !exists('g:auto_abbrev_add_current_word_map')
+    let g:auto_abbrev_add_current_word_map = '<leader>aa'
+endif
+
+if !exists('g:auto_abbrev_add_current_word_map_used')
+    let g:auto_abbrev_add_current_word_map_used = v:true
+endif
+
+if !exists('g:auto_abbrev_add_current_lhs_word_map')
+    let g:auto_abbrev_add_current_lhs_word_map = '<leader>al'
+endif
+
+if !exists('g:auto_abbrev_add_current_lhs_word_map_used')
+    let g:auto_abbrev_add_current_lhs_word_map_used = v:true
+endif
+
+if !exists('g:auto_abbrev_add_current_rhs_word_map')
+    let g:auto_abbrev_add_current_rhs_word_map = '<leader>ar'
+endif
+
+if !exists('g:auto_abbrev_add_current_rhs_word_map_used')
+    let g:auto_abbrev_add_current_rhs_word_map_used = v:true
+endif
+
+if !exists('g:auto_abbrev_reload_map')
+    let g:auto_abbrev_reload_map = '<leader>ae'
+endif
+
+if !exists('g:auto_abbrev_reload_map_used')
+    let g:auto_abbrev_reload_map_used = v:true
+endif
+
 " Global Variables }}}
 
 " Commands {{{
@@ -45,6 +77,29 @@ command! -nargs=* AutoAbbrevReload call auto_abbrev#load_abbrev()
 command! -nargs=1 AutoAbbrevDelAbbrev call auto_abbrev#del_abbrev(<f-args>)
 
 " Commands }}}
+
+" Mappings {{{
+
+if g:auto_abbrev_add_current_word_map_used && !empty(g:auto_abbrev_add_current_word_map)
+    execute "nnoremap " . g:auto_abbrev_add_current_word_map . " :AutoAbbrevAddCurrentWord<cr>"
+    execute "vnoremap " . g:auto_abbrev_add_current_word_map . " :<c-u>call auto_abbrev#add_current_word(visualmode())<cr>"
+endif
+
+if g:auto_abbrev_add_current_lhs_word_map_used && !empty(g:auto_abbrev_add_current_lhs_word_map)
+    execute "nnoremap " . g:auto_abbrev_add_current_lhs_word_map . " :AutoAbbrevAddCurrentLhsWord<cr>"
+    execute "vnoremap " . g:auto_abbrev_add_current_lhs_word_map . " :<c-u>call auto_abbrev#add_current_lhs_word(visualmode())<cr>"
+endif
+
+if g:auto_abbrev_add_current_rhs_word_map_used && !empty(g:auto_abbrev_add_current_rhs_word_map)
+    execute "nnoremap " . g:auto_abbrev_add_current_rhs_word_map . " :AutoAbbrevAddCurrentRhsWord<cr>"
+    execute "vnoremap " . g:auto_abbrev_add_current_rhs_word_map . " :<c-u>call auto_abbrev#add_current_rhs_word(visualmode())<cr>"
+endif
+
+if g:auto_abbrev_reload_map_used && !empty(g:auto_abbrev_reload_map)
+    execute "nnoremap " . g:auto_abbrev_reload_map . " :AutoAbbrevReload<cr>"
+endif
+
+" Mappings }}}
 
 " Plugin preparing {{{
 " Validate that the abbrev file is writable, create it if it does not exist.
