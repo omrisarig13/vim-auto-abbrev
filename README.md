@@ -32,10 +32,10 @@ of the plugin.
 * AutoAbbrevDelAbbrev - Delete an abbreviate from the abbreviate file.
 
 ### Mappings:
-* '<leader>aa' - call AutoAbbrevAddCurrentWord
-* '<leader>al' - call AutoAbbrevAddCurrentLhsWord
-* '<leader>ar' - call AutoAbbrevAddCurrentRhsWord
-* '<leader>ae' - call AutoAbbrevReload
+* '\<leader>aa' - call AutoAbbrevAddCurrentWord
+* '\<leader>al' - call AutoAbbrevAddCurrentLhsWord
+* '\<leader>ar' - call AutoAbbrevAddCurrentRhsWord
+* '\<leader>ae' - call AutoAbbrevReload
 
 ## Installation
 You can use your favorite plugin manager to install this plugin, as any other
