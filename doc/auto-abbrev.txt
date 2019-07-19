@@ -1,0 +1,461 @@
+*auto-abbrev.txt*     Automate Abbreviates for you
+*auto-abbrev* *AutoAbbrev* *vim-auto-abbrev* *vim-auto-abbrev.txt*
+
+Author:         Omri Sarig                                 July 16, 2019
+Version:        1.0
+
+==============================================================================
+        __    __  __  ____  _____       __    ____  ____  ____  ____  _  _
+       /__\  (  )(  )(_  _)(  _  )___  /__\  (  _ \(  _ \(  _ \( ___)( \/ )
+      /(__)\  )(__)(   )(   )(_)((___)/(__)\  ) _ < ) _ < )   / )__)  \  /
+     (__)(__)(______) (__) (_____)   (__)(__)(____/(____/(_)\_)(____)  \/
+
+==============================================================================
+1. Contents                                      *auto-abbrev-contents*
+
+    1. Contents............................................: |auto-abbrev-contents|
+    2. Description.........................................: |auto-abbrev-description|
+    3. Commands............................................: |auto-abbrev-commands|
+       3.1  AutoAbbrevAddAbbrev............................: |:AutoAbbrevAddAbbrev|
+       3.2  AutoAbbrevAddCurrentWord.......................: |:AutoAbbrevAddCurrentWord|
+       3.3  AutoAbbrevAddCurrentLhsWord....................: |:AutoAbbrevAddCurrentLhsWord|
+       3.4  AutoAbbrevAddCurrentRhsWord....................: |:AutoAbbrevAddCurrentRhsWord|
+       3.5  AutoAbbrevDelAbbrev............................: |:AutoAbbrevDelAbbrev|
+       3.6  AutoAbbrevReload...............................: |:AutoAbbrevReload|
+    4. Mappings............................................: |auto-abbrev-mappings|
+       4.1  <leader>aa.....................................: |<leader>aa|
+       4.2  <leader>al.....................................: |<leader>al|
+       4.3  <leader>ar.....................................: |<leader>ar|
+       4.4  <leader>ae.....................................: |<leader>ae|
+    5. Variables...........................................: |auto-abbrev-variables|
+       5.1   g:loaded_auto_abbrev..........................: |g:loaded_auto_abbrev|
+       5.2   g:auto_abbrev_use_file........................: |g:auto_abbrev_use_file|
+       5.3   g:auto_abbrev_file_path.......................: |g:auto_abbrev_file_path|
+       5.4   g:auto_abbrev_should_fix_abbrev...............: |g:auto_abbrev_should_fix_abbrev|
+       5.5   g:auto_abbrev_support_deletion................: |g:auto_abbrev_support_deletion|
+       5.6   g:auto_abbrev_add_current_word_map............: |g:auto_abbrev_add_current_word_map|
+       5.7   g:auto_abbrev_add_current_word_map_used.......: |g:auto_abbrev_add_current_word_map_used|
+       5.8   g:auto_abbrev_add_current_lhs_word_map........: |g:auto_abbrev_add_current_lhs_word_map|
+       5.9   g:auto_abbrev_add_current_lhs_word_map_used...: |g:auto_abbrev_add_current_lhs_word_map_used|
+       5.10  g:auto_abbrev_add_current_rhs_word_map........: |g:auto_abbrev_add_current_rhs_word_map|
+       5.11  g:auto_abbrev_add_current_rhs_word_map_used...: |g:auto_abbrev_add_current_rhs_word_map_used|
+       5.12  g:auto_abbrev_reload_map......................: |g:auto_abbrev_reload_map|
+       5.13  g:auto_abbrev_reload_map_used.................: |g:auto_abbrev_reload_map_used|
+       5.14  g:auto_abbrev_source_abbrev_file..............: |g:auto_abbrev_source_abbrev_file|
+    6. History................................: |auto-abbrev-history|
+
+
+==============================================================================
+2. Description                                   *auto-abbrev-description*
+
+Vim has a great feature - |abbreviates|. This feature let you automatically fix
+typos as you type. You should get familiar with it and read its help file.
+
+However, I find the interface if Vim's abbreviate a bit awkward - it is hard
+to maintain a good abbreviates file that would be updated automatically.
+
+This plugin is here to solve this problem. This plugin saves an abbreviates
+file, and automatically add abbreviates to this file as you use it. It makes
+the usage of the abbreviate a lot easier, and help users use this feature more
+wildly.
+
+==============================================================================
+3. Commands:                                     *auto-abbrev-commands*
+
+The most basic interface of this plugin is with commands that it creates.
+Those are the different commands that the plugin creates, with the needed
+parameters for every command.
+
+                                                         *:AutoAbbrevAddAbbrev*
+3.1  AutoAbbrevAddAbbrev
+			Add a new abbreviate.
+			This command gets two parameters that are the same as
+			the abbrev command's argument (lhs as the word before
+			the abbreviate, and rhs as the word to save instead of
+			the original word).
+			The command would change every instance of the
+			original word to the new word in the current file, add
+			the new abbreviate to the current session and add the
+			new abbreviate to the abbreviate file.
+			In case the lhs value for the command would already be
+			taken, this command would delete the previous value of
+			the abbreviate with this new one.
+
+			Examples: >
+				:AutoAbbrevAddAbbrev teh the
+<
+                                                    *:AutoAbbrevAddCurrentWord*
+3.2  AutoAbbrevAddCurrentWord
+			Add the current word as an abbreviate. This command
+			would take the word under the cursor as the lhs value
+			of the abbreviate, and ask you to insert the rhs for
+			this abbreviate. This command than would replace all
+			the instances of the original value with your new
+			abbreviate, add the abbreviate to the current session
+			and add it to your abbreviates file.
+			This command doesn't get any parameters, but it would
+			ask you to insert the rhs value of the abbreviate.
+
+                                                 *:AutoAbbrevAddCurrentLhsWord*
+3.3  AutoAbbrevAddCurrentLhsWord
+			Save the current word as an lhs value of an
+			abbreviate.  This command should be used when the
+			cursor is on a wrong word that you want to abbreviate,
+			but you don't want to type the whole word again.
+			This command must precede the command of
+			|AutoAbbrevAddCurrentRhsWord|, and it would save the
+			word that would be the lhs value for the abbreviate of
+			rhs.
+
+                                                 *:AutoAbbrevAddCurrentRhsWord*
+3.4  AutoAbbrevAddCurrentRhsWord
+			Save the current word as an rhs value of an
+			abbreviate.
+			This command would complete the command of
+			|AutoAbbrevAddCurrentLhsWord|. It would add the
+			current word as the rhs value of the abbreviate. It
+			would create the new abbreviate with the lhs value
+			from the previous command, and the rhs value from this
+			command.
+
+			Examples: >
+				enciclopedia
+				" The word encyclopedia with a typo in it.
+				:AutoAbbrevAddCurrentLhsWord
+				encyclopedia
+				" Fix the typo (with something like `Firy`)
+				:AutoAbbrevAddCurrentRhsWord
+				" Now the abbreviate of: enciclopedia
+				" encyclopedia was added.
+<
+                                                         *:AutoAbbrevDelAbbrev*
+3.5  AutoAbbrevDelAbbrev
+			Delete a given word from the abbreviates file.
+
+			This command would delete an abbreviate completely. It
+			would remove it from the current session and delete it
+			from the abbreviates file.
+			This command gets the lhs value of the abbreviate, the
+			one to remove.  Calling to this command might be a bit
+			awkward, since by writing the abbreviate word and
+			typing enter it would turn into the rhs value of this
+			abbreviate. Be sure to add <c-v><space> after the
+			word, to make sure the word would not change.
+
+			Examples: >
+				:AutoAbbrevDelAbbrev form
+				" This would remove the abbrev to form, which
+				" might happen by accident if you " forgot
+				" that it is a word by itself, and not just a
+				" typo of from.
+<
+                                                            *:AutoAbbrevReload*
+3.6  AutoAbbrevReload
+			Reload the abbreviate file in the current session.
+			In case you are adding abbreviates from multiple
+			sessions of vim at the same time, this should be used
+			every time you want to add or remove an abbreviate
+			from a session after a change from other session.
+			If you would call one of the add/delete functions of
+			the abbreviates after making a change from other
+			session without first reloading the file, it might
+			corrupt the file.
+==============================================================================
+4. Mappings                                            *auto-abbrev-mappings*
+
+Those are the mapping to call the command from the normal mode or visual mode.
+Most of the mappings can be called both from the normal mode and from the
+visual mode. When invoked from the normal mode, those commands would run on
+the current word. When invoked from the visual mode, those commands would work
+on the visually selected data.
+All those mappings can be remapped or not used by changing the global
+variables of the plugin.
+
+4.1 <leader>aa							   *<leader>aa*
+			Add the current word as an abbrev.
+
+			This mapping would run the command
+			|AutoAbbrevAddCurrentWord| on the word under the
+			cursor.
+
+			In normal mode, this mapping runs on the word under
+			the cursor. In visual mode, this mapping runs on the 
+			visually selected data.
+
+			Mnemonic: Auto-abbrev Add word
+
+			This mapping can be reconfigure by changing those
+			variables:
+			    |g:auto_abbrev_add_current_word_map| - 
+				Changes the actual mapping for this
+				command.
+			    |g:auto_abbrev_add_current_word_map_used| - 
+				Decides if the mapping is used or not.
+
+4.2 <leader>al							   *<leader>al*
+			Add the current word as a lhs word for abbrev.
+
+			This mapping would run the command
+			|AutoAbbrevAddCurrentLhsWord| on the word under the
+			cursor.
+
+			In normal mode, this mapping runs on the word under
+			the cursor. In visual mode, this mapping runs on the 
+			visually selected data.
+
+			Mnemonic: Auto-abbrev add lhs word
+
+			This mapping can be reconfigure by changing those
+			variables:
+			    |g:auto_abbrev_add_current_lhs_word_map| - 
+				Changes the actual mapping for this
+				command.
+			    |g:auto_abbrev_add_current_lhs_word_map_used| - 
+				Decides if the mapping is used or not.
+
+4.3 <leader>ar							   *<leader>ar*
+			Add the current word as a rhs word for abbrev.
+
+			This mapping would run the command
+			|AutoAbbrevAddCurrentRhsWord| on the word under the
+			cursor. This mapping can run only after running the
+			command of |AutoAbbrevAddCurrentLhsWord| (either by
+			the command itself, or by the command's mapping.
+
+			In normal mode, this mapping runs on the word under
+			the cursor. In visual mode, this mapping runs on the 
+			visually selected data.
+
+			Mnemonic: Auto-abbrev add lhs word
+
+			This mapping can be reconfigure by changing those
+			variables:
+			    |g:auto_abbrev_add_current_rhs_word_map| - 
+				Changes the actual mapping for this
+				command.
+			    |g:auto_abbrev_add_current_rhs_word_map_used| - 
+				Decides if the mapping is used or not.
+
+4.4 <leader>ae							   *<leader>ae*
+			Reload the plugin.
+
+			This mapping would run the command |AutoAbbrevReload|.
+
+			The command has only normal mode mapping, and it
+			doesn't matter where the cursor is when running it.
+
+			Mnemonic: Auto-abbrev rEload (since ar was already
+			taken).
+
+			This mapping can be reconfigure by changing those
+			variables:
+			    |g:auto_abbrev_reload_map| - 
+				Changes the actual mapping for this
+				command.
+			    |g:auto_abbrev_reload_map_used| - 
+				Decides if the mapping is used or not.
+
+==============================================================================
+5. Variables                                            *auto-abbrev-variables*
+
+This plugin have many customization options, almost everything can be changed
+by changing the relevant global variables. Every global variable has a default
+value, but it can (and should) be changed according to the user's preferences.
+
+You can customize the different options by setting those global variables in
+your |.vimrc|.
+>
+                                                         *g:loaded_auto_abbrev*
+5.1 g:loaded_auto_abbrev
+			If this flag would be presented and true, the plugin
+			would not be loaded at all.
+			Changing this value after the plugin was loaded would
+			have no effect at all.
+
+			Default: v:false (0)
+
+			Setting: >
+				let g:loaded_auto_abbrev = v:true
+				" Disable the plugin.
+<
+                                                       *g:auto_abbrev_use_file*
+5.2 g:auto_abbrev_use_file
+			Define whether or not the plugin would save the
+			abbreviates into a file, or just use them in the
+			memory.
+			This plugin would become a bit unnecessary if this
+			option would be set, but it is still possible to set
+			it to avoid saving the abbreviates to a given file.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_use_file = v:false
+<
+                                                      *g:auto_abbrev_file_path*
+5.3 g:auto_abbrev_file_path
+			The file path to use to save the abbreviate file in.
+			A new file would be created in this path (and the path
+			itself would be created if it is not present), and
+			would be used to save all the abbreviates added by
+			this plugin.
+
+			Default: '~/.vim/abbreviates'
+
+			Setting: >
+				let g:auto_abbrev_file_path = '~/.abbreviates'
+<
+                                              *g:auto_abbrev_should_fix_abbrev*
+5.4 g:auto_abbrev_should_fix_abbrev
+			Define whether or not the plugin would change all the
+			occurrences of the lsh value of the abbreviates when
+			a new abbreviate is added, or not.
+			In case the value of this global would be true, any
+			abbreviate adding would be followed by a substitute
+			command that would change all the values of the old
+			abbreviate. If this value would not be set, this
+			command would not run.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_should_fix_abbrev = v:false
+<
+                                               *g:auto_abbrev_support_deletion*
+5.5 g:auto_abbrev_support_deletion
+			Define whether or not the plugin would support
+			deleting of abbreviates.
+			If this value would be set to false, the plugin would
+			not support the deleting of abbreviates. Not the
+			manual deleting by using the |AutoAbbrevDelAbbrev|
+			command, and not the automatic deletion that happens
+			once a duplicate abbreviate is added.
+			In extreme cases, when the abbreviate file would be
+			huge, this option might slow down vim. If it is the
+			case, it is logical to set this value to false.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_support_deletion = v:false
+<
+                                           *g:auto_abbrev_add_current_word_map*
+5.6 g:auto_abbrev_add_current_word_map
+			Defines the key map to use in order to run the command
+			of |AutoAbbrevAddCurrentWord| from the normal mode.
+
+			Default: '<leader>aa' (mnemonic for "Autoabbrev Add")
+
+			Setting: >
+				let g:auto_abbrev_add_current_word_map = '<leader>a'
+<
+                                      *g:auto_abbrev_add_current_word_map_used*
+5.7 g:auto_abbrev_add_current_word_map_used
+			Defines whether to use the mapping of
+			|g:auto_abbrev_add_current_word_map| or not.
+			If this flag would be false, the mapping won't be
+			used, and there would be no way to activate this
+			mapping. The same effect can be done by setting the
+			mapping value to ''.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_add_current_word_map_used = v:false
+<
+                                       *g:auto_abbrev_add_current_lhs_word_map*
+5.8 g:auto_abbrev_add_current_lhs_word_map
+			Defines the key map to use in order to run the command
+			of |AutoAbbrevAddCurrentLhsWord| from the normal mode.
+
+			Default: '<leader>al' (mnemonic for "Autoabbrev Lhs")
+
+			Setting: >
+				let g:auto_abbrev_add_current_lhs_word_map = '<leader>l'
+<
+				  *g:auto_abbrev_add_current_lhs_word_map_used*
+5.9 g:auto_abbrev_add_current_lhs_word_map_used
+			Defines whether to use the mapping of
+			|g:auto_abbrev_add_current_lhs_word_map| or not.
+			If this flag would be false, the mapping won't be
+			used, and there would be no way to activate this
+			mapping. The same effect can be done by setting the
+			mapping value to ''.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_add_current_lhs_word_map_used = v:false
+<
+                                       *g:auto_abbrev_add_current_rhs_word_map*
+5.10 g:auto_abbrev_add_current_rhs_word_map
+			Defines the key map to use in order to run the command
+			of |AutoAbbrevAddCurrentRhsWord| from the normal mode.
+
+			Default: '<leader>ar' (mnemonic for "Autoabbrev Rhs")
+
+			Setting: >
+				let g:auto_abbrev_add_current_rhs_word_map = '<leader>r'
+<
+                                  *g:auto_abbrev_add_current_rhs_word_map_used*
+5.11 g:auto_abbrev_add_current_rhs_word_map_used
+			Defines whether to use the mapping of
+			|g:auto_abbrev_add_current_rhs_word_map| or not.
+			If this flag would be false, the mapping won't be
+			used, and there would be no way to activate this
+			mapping. The same effect can be done by setting the
+			mapping value to ''.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_add_current_rhs_word_map_used = v:false
+<
+                                                     *g:auto_abbrev_reload_map*
+5.12 g:auto_abbrev_reload_map
+			Defines the key map to use in order to run the command
+			of |AutoAbbrevReload| from the normal mode.
+
+			Default: '<leader>ae'
+			(mnemonic for "Autoabbrev rEload", since r was
+			already taken)
+
+			Setting: >
+				let g:auto_abbrev_reload_map = '<leader>e'
+<
+                                                *g:auto_abbrev_reload_map_used*
+5.13 g:auto_abbrev_reload_map_used
+			Defines whether to use the mapping of
+			|g:auto_abbrev_reload_map| or not.
+			If this flag would be false, the mapping won't be
+			used, and there would be no way to activate this
+			mapping. The same effect can be done by setting the
+			mapping value to ''.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_reload_map_used = v:false
+<
+                                            *g:auto_abbrev_source_abbrev_file*
+5.14 g:auto_abbrev_source_abbrev_file
+			Defines whether the plugin would source the
+			abbreviates file when loaded, or not.
+			The abbreviates file should be sourced when you open
+			Vim, since it needs to run the abbreviates for
+			you. The only reason to set this value to v:false is
+			if you are sourcing the abbreviates file somewhere
+			else in your configuration.
+
+			Default: v:true (1)
+
+			Setting: >
+				let g:auto_abbrev_source_abbrev_file = v:false
+<
+==============================================================================
+7. History                                       *auto-abbrev-history*
+
+  1.0: July, 16, 2019
+         Initial release.
+
+ vim:tw=78:ts=8:noet:ft=help:norl:

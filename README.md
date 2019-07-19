@@ -1,4 +1,5 @@
 # vim-auto-abbrev
+Automate Abbreviates for you
 
 ## Introduction
 Abbreviations are a great vim feature to automatically fix common typos.
@@ -52,6 +53,11 @@ Plugin 'omrisarig13/vim-auto-abbrev'
 git clone https://github.com/omrisarig13/vim-auto-abbrev.git ~/.vim/bundle/vim-auto-abbrev
 ```
 Than reload Vim and run `:helptags ~/.vim/bundle/vim-auto-abbrev/doc/` in it.
+
+## Farther Reading
+For father reading and explanation about all the plugin usage and possible
+configuration read the help of the plugin (install it and then run 
+`help auto-abbrev.txt`
 
 ## Contributing
 If you want to contribute to the plugin, please do.
